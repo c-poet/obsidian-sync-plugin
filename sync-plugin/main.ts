@@ -26,7 +26,7 @@ export default class MyPlugin extends Plugin {
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+		statusBarItemEl.setText('最近同步时间: 2023年03月13日 15:44:33');
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
