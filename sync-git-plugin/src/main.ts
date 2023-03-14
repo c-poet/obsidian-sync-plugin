@@ -65,9 +65,7 @@ export default class GitSyncPlugin extends Plugin {
 			}, this.settings.autoSyncTimes));
 		}
 
-		this.registerObsidianProtocolHandler
-
-		// 启动时同步
+		// 启动时同步一次
 		this.handleGitPullAndPush();
 	}
 
