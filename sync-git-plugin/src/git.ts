@@ -58,7 +58,7 @@ export const gitPull = (option: GitPullOption = DEFAULT_GIT_OPTION) => {
 // git提交至远程仓库
 export const gitPush = (option: GitPushOption = {...DEFAULT_GIT_OPTION}) => {
     option = Object.assign({}, {...DEFAULT_GIT_OPTION, force: true, message: 'fix: auto sync'}, option);
-    let gitCommand = `git add . && git commit -m ${option.message}`
+    let gitCommand = `git add . && git commit -m "${option.message}"`
     gitCommand += ` && git push ${option.remote} ${option.branch}`;
     if (option.force) {
         gitCommand += ' --force';

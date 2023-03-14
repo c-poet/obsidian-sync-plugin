@@ -1,8 +1,12 @@
-/*
+@-webkit-keyframes git-sync-plugin-changeright{       
+		 
+	0%{-webkit-transform:rotate(0deg);}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+	50%{-webkit-transform:rotate(180deg);}
 
-If your plugin does not need CSS, delete this file.
+	100%{-webkit-transform:rotate(360deg);}
+}
 
-*/
+.git-sync-plugin-imgrotate-rotate {
+	-webkit-animation:git-sync-plugin-changeright 3s linear infinite;
+}

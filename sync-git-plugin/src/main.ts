@@ -1,7 +1,6 @@
-import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, Plugin, PluginSettingTab, Setting, moment } from 'obsidian';
 import { existsSync } from 'fs';
 import * as Git from './git'
-const dayjs = require('dayjs')
 
 // Git同步配置
 interface GitSyncSettings {
@@ -27,15 +26,19 @@ const DEFAULT_SETTINGS: GitSyncSettings = {
 	timeformat: 'YYYY-MM-DD HH:mm:ss'
 }
 
+// 同步旋转class-name
+const gitSyncRotateClass = 'git-sync-plugin-imgrotate-rotate';
+
 // git同步插件
 export default class GitSyncPlugin extends Plugin {
 	settings: GitSyncSettings;
+	ribbonIcon: HTMLElement;
 	statusBarItem: HTMLElement;
 
 	async onload() {
 		await this.loadSettings();
 
-		const ribbonIconEl = this.addRibbonIcon('sync', '同步', (evt: MouseEvent) => this.handleGitPullAndPush());
+	  	this.ribbonIcon = this.addRibbonIcon('sync', '手动同步', (evt: MouseEvent) => this.handleGitPullAndPush());
 
 		// 添加操作命令
 		this.addCommand({
@@ -53,7 +56,6 @@ export default class GitSyncPlugin extends Plugin {
 		// 注册配置页面
 		this.addSettingTab(new GitSyncSettingTab(this.app, this));
 
-
 		if (this.settings.autoSync && this.settings.autoSyncTimes) {
 			// 注册同步定时器
 			this.registerInterval(window.setInterval(() => {
@@ -62,41 +64,54 @@ export default class GitSyncPlugin extends Plugin {
 			}, this.settings.autoSyncTimes));
 		}
 
+		this.registerObsidianProtocolHandler
+
 		// 启动时同步
 		this.handleGitPullAndPush();
 	}
 
 	onunload() {
-
+		// 关闭时同步
+		this.handleGitPullAndPush();
 	}
 
 	// git拉取后在提交
 	handleGitPullAndPush() {
 		this.handleGitPull();
 		this.handleGitPush();
-		const time = dayjs().format(this.settings.timeformat);
+		const time = moment().format(this.settings.timeformat);
 		this.showSyncStatus(`最近同步时间：${time}`);
 	}
 
 	// git拉取
 	handleGitPull() {
 		this.checkAndGetSettings(seetings => {
-			Git.gitPull({
-				rootPath: seetings.activeRepository
-			});
-			const time = dayjs().format(this.settings.timeformat);
-			this.showSyncStatus(`最近拉取时间：${time}`);
+			try {
+				this.ribbonIcon.addClass(gitSyncRotateClass);
+				Git.gitPull({
+					rootPath: seetings.activeRepository
+				});
+				const time = moment().format(this.settings.timeformat);
+				this.showSyncStatus(`最近拉取时间：${time}`);
+			} finally {
+				this.ribbonIcon.removeClass(gitSyncRotateClass);
+			}
 		});
 	}
 
 	// git提交
 	handleGitPush() {
 		this.checkAndGetSettings(seetings => {
-			Git.gitPush({
-				rootPath: seetings.activeRepository
-			});
-			const time = dayjs().format(this.settings.timeformat);
-			this.showSyncStatus(`最近提交时间：${time}`);
+			try {
+				this.ribbonIcon.addClass(gitSyncRotateClass);
+				Git.gitPush({
+					rootPath: seetings.activeRepository
+				});
+				const time = moment().format(this.settings.timeformat);
+				this.showSyncStatus(`最近提交时间：${time}`);
+			} finally {
+				this.ribbonIcon.removeClass(gitSyncRotateClass);
+			}
 		});
 	}
 
