@@ -1,0 +1,11 @@
+{
+	"id": "cpoet-sync-git-plugin",
+	"name": "sync-git-plugin",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "obsidian自动同步git插件",
+	"author": "CPoet",
+	"authorUrl": "https://www.cpoet.cn",
+	"fundingUrl": "https://www.cpoet.cn",
+	"isDesktopOnly": false
+}
