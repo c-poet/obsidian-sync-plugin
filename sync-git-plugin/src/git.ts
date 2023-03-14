@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import * as OS from 'os'
 
 // git基本信息
 export interface GitBaseOption {
@@ -28,7 +29,11 @@ export interface GitPushOption extends GitBaseOption {
 const getCommonCommandBefore = (option: GitBaseOption = DEFAULT_GIT_OPTION) => {
     let command = '';
     if (option.rootPath) {
-        command += 'cd ' + option.rootPath + ' && ';
+        command += 'cd ';
+		if (OS.type() === 'Windows_NT') {
+			command += '/d ';
+		}
+		command += option.rootPath + ' && '
     }
     return command;
 }
@@ -50,7 +55,7 @@ export const gitPull = (option: GitPullOption = DEFAULT_GIT_OPTION) => {
 // git提交至远程仓库
 export const gitPush = (option: GitPushOption = DEFAULT_GIT_OPTION) => {
     option = Object.assign({}, DEFAULT_GIT_OPTION, option);
-    let gitCommand = `git pull ${option.remote} ${option.branch}`;
+    let gitCommand = `git push ${option.remote} ${option.branch}`;
     if (option.force) {
         gitCommand += ' --force';
     }
