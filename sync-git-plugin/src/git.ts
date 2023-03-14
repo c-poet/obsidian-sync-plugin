@@ -1,5 +1,4 @@
-import { execSync } from "child_process";
-import * as OS from 'os'
+import { isOsType, OsType, execCommand } from './core';
 
 // git基本信息
 export interface GitBaseOption {
@@ -33,7 +32,7 @@ const getCommonCommandBefore = (option: GitBaseOption = DEFAULT_GIT_OPTION) => {
     let command = '';
     if (option.rootPath) {
         command += 'cd ';
-		if (OS.type() === 'Windows_NT') {
+		if (isOsType(OsType.Win)) {
 			command += '/d ';
 		}
 		command += option.rootPath + ' && '
@@ -44,15 +43,6 @@ const getCommonCommandBefore = (option: GitBaseOption = DEFAULT_GIT_OPTION) => {
 // 获取公共命令后置
 const getCommonCommandAfter = (option: GitBaseOption = DEFAULT_GIT_OPTION) => {
     return '';
-}
-
-// 执行命令,成功返回执行结果,失败返回false
-const execCommand = (command : string) => {
-	try {
-    	return execSync(command, { encoding: 'utf-8' });
-	} catch ( e ) {
-	}
-	return false;
 }
 
 // git拉取远程仓库
