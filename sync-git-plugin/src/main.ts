@@ -33,12 +33,13 @@ const gitSyncRotateClass = 'git-sync-plugin-imgrotate-rotate';
 export default class GitSyncPlugin extends Plugin {
 	settings: GitSyncSettings;
 	ribbonIcon: HTMLElement;
+	transitionId: string | null;
 	statusBarItem: HTMLElement;
 
 	async onload() {
 		await this.loadSettings();
 
-	  	this.ribbonIcon = this.addRibbonIcon('sync', '手动同步', (evt: MouseEvent) => this.handleGitPullAndPush());
+		this.ribbonIcon = this.addRibbonIcon('sync', '手动同步', (evt: MouseEvent) => this.handleGitPullAndPush());
 
 		// 添加操作命令
 		this.addCommand({
@@ -75,53 +76,81 @@ export default class GitSyncPlugin extends Plugin {
 		this.handleGitPullAndPush();
 	}
 
+	// 显示过渡动画
+	startSyncTransition() {
+		if (!this.transitionId) { 
+			this.ribbonIcon.addClass(gitSyncRotateClass);
+		}
+		return (this.transitionId = '' + new Date().getTime())
+	} 
+
+	// 停止过渡动画
+	stopSyncTransition(transitionId: string) {
+		if (this.transitionId === transitionId) {
+			window.setTimeout(() => {
+				if (this.transitionId === transitionId) {
+					this.ribbonIcon.removeClass(gitSyncRotateClass);
+					this.transitionId = null;
+				}
+			}, 3500);
+		}
+	}
+
 	// git拉取后在提交
 	handleGitPullAndPush() {
-		this.handleGitPull();
-		this.handleGitPush();
-		const time = moment().format(this.settings.timeformat);
-		this.showSyncStatus(`最近同步时间：${time}`);
+		const tid = this.startSyncTransition();
+		if (this.handleGitPull() !== false && this.handleGitPush() !== false) {
+			const time = moment().format(this.settings.timeformat);
+			this.showSyncStatus(`最近同步时间：${time}`);
+		}
+		this.stopSyncTransition(tid);
 	}
 
 	// git拉取
 	handleGitPull() {
-		this.checkAndGetSettings(seetings => {
+		return this.checkAndGetSettings(seetings => {
+			const tid = this.startSyncTransition();
 			try {
-				this.ribbonIcon.addClass(gitSyncRotateClass);
-				Git.gitPull({
+				const ret = Git.gitPull({
 					rootPath: seetings.activeRepository
 				});
-				const time = moment().format(this.settings.timeformat);
-				this.showSyncStatus(`最近拉取时间：${time}`);
+				if (ret !== false) {
+					const time = moment().format(this.settings.timeformat);
+					this.showSyncStatus(`最近拉取时间：${time}`);
+				}
+				return ret;
 			} finally {
-				this.ribbonIcon.removeClass(gitSyncRotateClass);
+				this.stopSyncTransition(tid);
 			}
 		});
 	}
 
 	// git提交
 	handleGitPush() {
-		this.checkAndGetSettings(seetings => {
+		return this.checkAndGetSettings(seetings => {
+			const tid = this.startSyncTransition();
 			try {
-				this.ribbonIcon.addClass(gitSyncRotateClass);
-				Git.gitPush({
+				const ret = Git.gitPush({
 					rootPath: seetings.activeRepository
 				});
-				const time = moment().format(this.settings.timeformat);
-				this.showSyncStatus(`最近提交时间：${time}`);
+				if (ret !== false) {
+					const time = moment().format(this.settings.timeformat);
+					this.showSyncStatus(`最近提交时间：${time}`);
+				}
+				return ret;
 			} finally {
-				this.ribbonIcon.removeClass(gitSyncRotateClass);
+				this.stopSyncTransition(tid);
 			}
 		});
 	}
 
 	// 校验及获取配置
-	async checkAndGetSettings(callback: (setting: GitSyncSettings) => void) {
+	checkAndGetSettings(callback: (setting: GitSyncSettings) => string | boolean) {
 		if (this.settings.activeRepository == null) {
 			new Notice('未配置仓库地址，请检查！');
 			return;
 		}
-		callback(this.settings);
+		return callback(this.settings);
 	}
 
 	// 处理目标仓库

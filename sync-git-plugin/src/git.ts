@@ -46,13 +46,22 @@ const getCommonCommandAfter = (option: GitBaseOption = DEFAULT_GIT_OPTION) => {
     return '';
 }
 
+// 执行命令,成功返回执行结果,失败返回false
+const execCommand = (command : string) => {
+	try {
+    	return execSync(command, { encoding: 'utf-8' });
+	} catch ( e ) {
+	}
+	return false;
+}
+
 // git拉取远程仓库
 export const gitPull = (option: GitPullOption = DEFAULT_GIT_OPTION) => {
     option = Object.assign({}, DEFAULT_GIT_OPTION, option);
     let gitCommand = `git pull ${option.remote} ${option.branch}`;
     gitCommand = getCommonCommandBefore(option) + gitCommand + getCommonCommandAfter();
     console.log('执行pull命令', gitCommand);
-    execSync(gitCommand);
+    return execCommand(gitCommand);
 }
 
 // git提交至远程仓库
@@ -65,5 +74,5 @@ export const gitPush = (option: GitPushOption = {...DEFAULT_GIT_OPTION}) => {
     }
     gitCommand = getCommonCommandBefore(option) + gitCommand + getCommonCommandAfter();
     console.log('执行push命令', gitCommand);
-    execSync(gitCommand);
+	return execCommand(gitCommand);
 }
