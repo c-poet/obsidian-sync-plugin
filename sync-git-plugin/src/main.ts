@@ -113,7 +113,8 @@ export default class GitSyncPlugin extends Plugin {
 	handleActiveRepository() {
 		if (this.settings.repositories) {
 			const repositories = this.settings.repositories.split(';');
-			for (const repository in repositories) {
+			for (const key in repositories) {
+				const repository = repositories[key];
 				const gitDir = repository + "/" + ".git";
 				if (existsSync(gitDir)) {
 					this.settings.activeRepository = repository;
