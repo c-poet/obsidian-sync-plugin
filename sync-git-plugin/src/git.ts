@@ -22,7 +22,10 @@ export interface GitPullOption extends GitBaseOption {
 
 // git提交配置
 export interface GitPushOption extends GitBaseOption {
+    // 是否强制提交
     force?: boolean | undefined;
+    // 提交信息
+    message?: string | undefined;
 }
 
 // 获取公共命令前置
@@ -53,9 +56,10 @@ export const gitPull = (option: GitPullOption = DEFAULT_GIT_OPTION) => {
 }
 
 // git提交至远程仓库
-export const gitPush = (option: GitPushOption = DEFAULT_GIT_OPTION) => {
-    option = Object.assign({}, DEFAULT_GIT_OPTION, option);
-    let gitCommand = `git push ${option.remote} ${option.branch}`;
+export const gitPush = (option: GitPushOption = {...DEFAULT_GIT_OPTION}) => {
+    option = Object.assign({}, {...DEFAULT_GIT_OPTION, force: true, message: 'fix: auto sync'}, option);
+    let gitCommand = `git add . && git commit -m ${option.message}`
+    gitCommand += ` && git push ${option.remote} ${option.branch}`;
     if (option.force) {
         gitCommand += ' --force';
     }
