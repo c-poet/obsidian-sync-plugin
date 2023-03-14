@@ -54,17 +54,21 @@ export default class GitSyncPlugin extends Plugin {
 		this.addCommand({
 			id: 'git-push',
 			name: 'Git提交本地',
-			callback: this.handleGitPush
+			callback: () => {
+				this.handleGitPush();
+			}
 		});
 		// 添加拉取命令
 		this.addCommand({
 			id: 'git-pull',
 			name: 'Git拉取远程',
-			callback: this.handleGitPull
+			callback: () => {
+				this.handleGitPull();
+			}
 		});
 
 		// 如果是修改文件，则判断当前修改操作和上次提交时间的间隔。大于1分钟才触发提交
-		this.registerEvent(this.app.vault.on('modify', file => {
+		this.registerEvent(this.app.vault.on('modify', () => {
 			const curTime = curTimestamp();
 			if (curTime - this.lastPushTime > 60000) {
 				this.handleGitPush();
@@ -72,11 +76,17 @@ export default class GitSyncPlugin extends Plugin {
 		}));
 
 		// 删除文件直接提交
-		this.registerEvent(this.app.vault.on('delete', this.handleGitPush));
+		this.registerEvent(this.app.vault.on('delete', () => {
+			this.handleGitPush();
+		}));
 		// 重命名文件直接提交
-		this.registerEvent(this.app.vault.on('rename', this.handleGitPush));
+		this.registerEvent(this.app.vault.on('rename', () => {
+			this.handleGitPush();
+		}));
 		// 创建文件直接提交
-		this.registerEvent(this.app.vault.on('create', this.handleGitPush));
+		this.registerEvent(this.app.vault.on('create', () => {
+			this.handleGitPush;
+		}));
 
 		// 注册配置页面
 		this.addSettingTab(new GitSyncSettingTab(this.app, this));
